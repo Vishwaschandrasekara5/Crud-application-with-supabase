@@ -1,34 +1,82 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React,{useState,useEffect} from 'react'
+import { supabase } from './createClient'
 
-function App() {
-  const [count, setCount] = useState(0)
+const App = () => {
+
+const[users,setUsers] = useState([])
+
+const [user,setUser] = useState({
+  name:'',
+  age:0
+})
+
+// console.log(user);
+
+
+
+useEffect(() => {
+  fetchUsers()
+},[])
+
+async function fetchUsers(){
+  const {data} = await supabase
+  .from('users')
+  .select('*')
+  setUsers(data)
+  // console.log(data);
+}
+
+function handlechange(e){
+  const {name,value} = e.target
+  setUser({
+    ...user,
+    [name]:value
+  })
+}
+
+async function createUser(){
+  await supabase
+  .from('users')
+  .insert(
+    { name: user.name, age: user.age }
+  )
+}
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <div>
+
+      <form action="">
+
+        <input type="text" placeholder='Name' name='name' onChange={handlechange}/>
+        <input type="number" placeholder='Age' name='age' onChange={handlechange}/>
+        <button type='submit' onClick={createUser}>Submit</button>
+
+
+
+      </form>
+
+
+
+      <table>
+        <thead>
+          <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Age</th>
+          </tr>
+        </thead>
+        <tbody>
+          {users.map((user) => (
+            <tr>
+              <td>{user.id}</td>
+              <td>{user.name}</td>
+              <td>{user.age}</td>
+            </tr>
+          ))}
+        </tbody>
+       
+      </table>
+    </div>
   )
 }
 
